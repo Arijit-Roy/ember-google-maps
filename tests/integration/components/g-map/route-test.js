@@ -17,11 +17,17 @@ module('Integration | Component | g-map/route', function(hooks) {
 
     await render(hbs`
       {{#g-map lat=lat lng=lng as |g|}}
-        {{#g.directions origin=origin destination=destination travelMode="WALKING" as |d|}}
+        {{#g.directions
+          origin=origin
+          destination=destination
+          travelMode="WALKING"
+          onDirectionsChanged=(action trackAction 'directionsReady') as |d|}}
           {{d.route}}
         {{/g.directions}}
       {{/g-map}}
     `);
+
+    await this.seenAction('directionsReady', { timeout: 10000 });
 
     let { components: { routes } } = this.gMapAPI;
 
@@ -53,12 +59,14 @@ module('Integration | Component | g-map/route', function(hooks) {
 
     assert.equal(origin, this.origin);
 
-    this.set('origin', 'Holborn Station');
+    Ember.run(() => {
+      this.set('origin', 'Holborn Station');
+    });
 
     await this.seenAction('directionsReady', { timeout: 10000 });
 
     directions = routes[0].mapComponent.directions;
-    ({ origin } = getDirectionsQuery(directions));
+    origin = getDirectionsQuery(directions).origin;
 
     assert.equal(origin, this.origin);
   });
