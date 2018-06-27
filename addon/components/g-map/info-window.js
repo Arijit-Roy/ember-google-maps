@@ -51,7 +51,6 @@ export default MapComponent.extend({
       this.close();
     }
 
-    set(this, '_cachedIsOpen', isOpen);
   },
 
   _addComponent() {
@@ -99,8 +98,10 @@ export default MapComponent.extend({
       google.maps.event.addListenerOnce(this.mapComponent, 'closeclick', () => {
         set(this, 'isOpen', false);
       });
-
-      this.mapComponent.open(get(this, 'map'), get(this, 'target'));
+      if (get(this, 'target')) {
+        this.mapComponent.open(get(this, 'map'), get(this, 'target'));
+        set(this, '_cachedIsOpen', Ember.get(this, 'isOpen'));
+      }
     }
   },
 
